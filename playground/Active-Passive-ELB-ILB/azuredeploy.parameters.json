@@ -50,6 +50,18 @@
         "publicIP3ResourceGroup": {
             "value": ""
         },
+        "publicIP4Name": {
+            "value": "FGTAPublicIP"
+        },
+        "publicIP4ResourceGroup": {
+            "value": ""
+        },
+        "publicIP5Name": {
+            "value": "FGTBPublicIP"
+        },
+        "publicIP5ResourceGroup": {
+            "value": ""
+        },
         "publicIPAddressType": {
             "value": "Static"
         },

@@ -98,6 +98,28 @@
         "description": "Whether to use a public IP and if so whether it is new"
       }
     },
+    "publicIP4NewOrExisting": {
+      "type": "string",
+      "defaultValue": "new",
+      "allowedValues": [
+        "new",
+        "existing"
+      ],
+      "metadata": {
+        "description": "Whether to use a public IP and if so whether it is new"
+      }
+    },
+        "publicIP5NewOrExisting": {
+      "type": "string",
+      "defaultValue": "new",
+      "allowedValues": [
+        "new",
+        "existing"
+      ],
+      "metadata": {
+        "description": "Whether to use a public IP and if so whether it is new"
+      }
+    },
     "publicIPName": {
       "type": "string",
       "defaultValue": "FGTAPClusterPublicIP",
@@ -134,6 +156,34 @@
       }
     },
     "publicIP3ResourceGroup": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Resource group to which the Public IP belongs."
+      }
+    },
+    "publicIP4Name": {
+      "type": "string",
+      "defaultValue": "FGTAPublicIP",
+      "metadata": {
+        "description": "Name of Public IP address element."
+      }
+    },
+    "publicIP4ResourceGroup": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Resource group to which the Public IP belongs."
+      }
+    },
+    "publicIP5Name": {
+      "type": "string",
+      "defaultValue": "FGTBPublicIP",
+      "metadata": {
+        "description": "Name of Public IP address element."
+      }
+    },
+    "publicIP5ResourceGroup": {
       "type": "string",
       "defaultValue": "",
       "metadata": {
@@ -310,6 +360,10 @@
     "publicIP2Id": "[if(equals(parameters('publicIP2NewOrExisting'),'new'),resourceId('Microsoft.Network/publicIPAddresses',variables('publicIP2Name')),resourceId(parameters('publicIP2ResourceGroup'),'Microsoft.Network/publicIPAddresses',variables('publicIP2Name')))]",
     "publicIP3Name": "[if(equals(parameters('publicIP3Name'),''),concat(parameters('fortigateNamePrefix'),'-FGT-B-MGMT-PIP'),parameters('publicIP3Name'))]",
     "publicIP3Id": "[if(equals(parameters('publicIP3NewOrExisting'),'new'),resourceId('Microsoft.Network/publicIPAddresses',variables('publicIP3Name')),resourceId(parameters('publicIP3ResourceGroup'),'Microsoft.Network/publicIPAddresses',variables('publicIP3Name')))]",
+    "publicIP4Name": "[if(equals(parameters('publicIP4Name'),''),concat(parameters('fortigateNamePrefix'),'-FGT-A-PIP'),parameters('publicIP4Name'))]",
+    "publicIP4Id": "[if(equals(parameters('publicIP4NewOrExisting'),'new'),resourceId('Microsoft.Network/publicIPAddresses',variables('publicIP4Name')),resourceId(parameters('publicIP4ResourceGroup'),'Microsoft.Network/publicIPAddresses',variables('publicIP4Name')))]",
+    "publicIP5Name": "[if(equals(parameters('publicIP5Name'),''),concat(parameters('fortigateNamePrefix'),'-FGT-B-PIP'),parameters('publicIP5Name'))]",
+    "publicIP5Id": "[if(equals(parameters('publicIP5NewOrExisting'),'new'),resourceId('Microsoft.Network/publicIPAddresses',variables('publicIP5Name')),resourceId(parameters('publicIP5ResourceGroup'),'Microsoft.Network/publicIPAddresses',variables('publicIP5Name')))]",
 
     "NSGName": "[concat(parameters('fortigateNamePrefix'),'-',uniqueString(resourceGroup().id),'-NSG')]",
     "NSGId": "[resourceID('Microsoft.Network/networkSecurityGroups/',variables('NSGName'))]",
@@ -368,16 +422,7 @@
     "internalLBBEName": "[concat(parameters('fortigateNamePrefix'),'-ILB-',parameters('subnet2Name'),'-BackEnd')]",
     "internalLBBEId": "[resourceID('Microsoft.Network/loadBalancers/backendAddressPools/',variables('internalLBName'),variables('internalLBBEName'))]",
     "internalLBProbeName": "lbprobe",
-    "internalLBProbeId": "[resourceId('Microsoft.Network/loadBalancers/probes/',variables('internalLBName'),variables('internalLBProbeName'))]",
-
-    "externalLBName": "[concat(parameters('fortigateNamePrefix'),'-ExternalLoadBalancer')]",
-    "externalLBId": "[resourceId('Microsoft.Network/loadBalancers',variables('externalLBName'))]",
-    "externalLBFEName": "[concat(parameters('fortigateNamePrefix'),'-ELB-',parameters('subnet1Name'),'-FrontEnd')]",
-    "externalLBFEId": "[resourceID('Microsoft.Network/loadBalancers/frontendIPConfigurations/',variables('externalLBName'),variables('externalLBFEName'))]",
-    "externalLBBEName": "[concat(parameters('fortigateNamePrefix'),'-ILB-',parameters('subnet1Name'),'-BackEnd')]",
-    "externalLBBEId": "[resourceID('Microsoft.Network/loadBalancers/backendAddressPools/',variables('externalLBName'),variables('externalLBBEName'))]",
-    "externalLBProbeName": "lbprobe",
-    "externalLBProbeId": "[resourceId('Microsoft.Network/loadBalancers/probes/',variables('externalLBName'),variables('externalLBProbeName'))]"
+    "internalLBProbeId": "[resourceId('Microsoft.Network/loadBalancers/probes/',variables('internalLBName'),variables('internalLBProbeName'))]"
   },
   "resources": [
     {
@@ -641,87 +686,37 @@
       }
     },
     {
+      "condition": "[equals(parameters('publicIP4NewOrExisting'), 'new')]",
+      "type": "Microsoft.Network/publicIPAddresses",
       "apiVersion": "2020-04-01",
-      "type": "Microsoft.Network/loadBalancers",
-      "name": "[variables('externalLBName')]",
-      "location": "[parameters('location')]",
       "tags": {
         "provider": "[toUpper(parameters('fortinetTags').provider)]"
       },
+      "name": "[variables('publicIP4Name')]",
+      "location": "[parameters('location')]",
       "sku":
       {
         "name": "Standard"
       },
-      "dependsOn": [
-        "[variables('publicIPId')]"
-      ],
       "properties": {
-        "frontendIPConfigurations": [
-          {
-            "name": "[variables('externalLBFEName')]",
-            "properties": {
-              "publicIPAddress": {
-                "id": "[variables('publicIPId')]"
-              }
-            }
-          }
-        ],
-        "backendAddressPools": [
-          {
-            "name": "[variables('externalLBBEName')]"
-          }
-        ],
-        "loadBalancingRules": [
-          {
-            "properties": {
-              "frontendIPConfiguration": {
-                "id": "[variables('externalLBFEId')]"
-              },
-              "backendAddressPool": {
-                "id": "[variables('externalLBBEId')]"
-              },
-              "probe": {
-                "id": "[variables('externalLBProbeId')]"
-              },
-              "protocol": "Tcp",
-              "frontendPort": 80,
-              "backendPort": 80,
-              "enableFloatingIP": true,
-              "idleTimeoutInMinutes": 5
-            },
-            "name": "PublicLBRule-FE1-http"
-          },
-          {
-            "properties": {
-              "frontendIPConfiguration": {
-                "id": "[variables('externalLBFEId')]"
-              },
-              "backendAddressPool": {
-                "id": "[variables('externalLBBEId')]"
-              },
-              "probe": {
-                "id": "[variables('externalLBProbeId')]"
-              },
-              "protocol": "Udp",
-              "frontendPort": 10551,
-              "backendPort": 10551,
-              "enableFloatingIP": true,
-              "idleTimeoutInMinutes": 5
-            },
-            "name": "PublicLBRule-FE1-udp10551"
-          }
-        ],
-        "probes": [
-          {
-            "properties": {
-              "protocol": "Tcp",
-              "port": 8008,
-              "intervalInSeconds": 5,
-              "numberOfProbes": 2
-            },
-            "name": "[variables('externalLBProbeName')]"
-          }
-        ]
+        "publicIPAllocationMethod": "[parameters('publicIPAddressType')]"
+      }
+    },
+    {
+      "condition": "[equals(parameters('publicIP5NewOrExisting'), 'new')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2020-04-01",
+      "tags": {
+        "provider": "[toUpper(parameters('fortinetTags').provider)]"
+      },
+      "name": "[variables('publicIP5Name')]",
+      "location": "[parameters('location')]",
+      "sku":
+      {
+        "name": "Standard"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "[parameters('publicIPAddressType')]"
       }
     },
     {
@@ -734,7 +729,6 @@
       "location": "[parameters('location')]",
       "dependsOn": [
         "[variables('vnetName')]",
-        "[variables('externalLBId')]",
         "[variables('NSGId')]"
       ],
       "properties": {
@@ -744,14 +738,12 @@
             "properties": {
               "privateIPAddress": "[variables('sn1IPfga')]",
               "privateIPAllocationMethod": "Static",
+              "publicIPAddress": {
+                "id": "[variables('publicIP4Id')]"
+              },
               "subnet": {
                 "id": "[variables('subnet1Id')]"
-              },
-              "loadBalancerBackendAddressPools": [
-                {
-                  "id": "[variables('externalLBBEId')]"
-                }
-              ]
+              }
             }
           }
         ],
@@ -772,7 +764,6 @@
       "location": "[parameters('location')]",
       "dependsOn": [
         "[variables('vnetName')]",
-        "[variables('externalLBId')]",
         "[variables('NSGId')]"
       ],
       "properties": {
@@ -782,14 +773,12 @@
             "properties": {
               "privateIPAddress": "[variables('sn1IPfgb')]",
               "privateIPAllocationMethod": "Static",
+              "publicIPAddress": {
+                "id": "[variables('publicIP5Id')]"
+              },
               "subnet": {
                 "id": "[variables('subnet1Id')]"
-              },
-              "loadBalancerBackendAddressPools": [
-                {
-                  "id": "[variables('externalLBBEId')]"
-                }
-              ]
+              }
             }
           }
         ],
@@ -821,12 +810,7 @@
               "privateIPAddress": "[variables('sn2IPfga')]",
               "subnet": {
                 "id": "[variables('subnet2Id')]"
-              },
-              "loadBalancerBackendAddressPools": [
-                {
-                  "id": "[variables('internalLBBEId')]"
-                }
-              ]
+              }
             }
           }
         ],
