@@ -109,7 +109,7 @@
         "description": "Whether to use a public IP and if so whether it is new"
       }
     },
-        "publicIP5NewOrExisting": {
+    "publicIP5NewOrExisting": {
       "type": "string",
       "defaultValue": "new",
       "allowedValues": [
@@ -303,6 +303,59 @@
         "description": "Subnet 5 Prefix"
       }
     },
+    "subnet6Name": {
+      "type": "string",
+      "defaultValue": "AppGWSubnet",
+      "metadata": {
+        "description": "Subnet 6 Name"
+      }
+    },
+    "subnet6Prefix": {
+      "type": "string",
+      "defaultValue": "172.16.138.0/24",
+      "metadata": {
+        "description": "Subnet 6 Prefix"
+      }
+    },
+    "applicationGatewayName": {
+      "type": "string",
+      "defaultValue": "applicationGatewayV2",
+      "metadata": {
+        "description": "Application Gateway name"
+      }
+    },
+    "minCapacity": {
+      "type": "int",
+      "defaultValue": 2,
+      "metadata": {
+        "description": "Minimum instance count for Application Gateway"
+      }
+    },
+    "frontendPort": {
+      "type": "int",
+      "defaultValue": 80,
+      "metadata": {
+        "description": "Application Gateway Frontend port"
+      }
+    },
+    "backendPort": {
+      "type": "int",
+      "defaultValue": 80,
+      "metadata": {
+        "description": "Application gateway Backend port"
+      }
+    },
+    "cookieBasedAffinity": {
+      "type": "string",
+      "allowedValues": [
+        "Enabled",
+        "Disabled"
+      ],
+      "defaultValue": "Disabled",
+      "metadata": {
+        "description": "Cookie based affinity"
+      }
+    },
     "location": {
       "type": "string",
       "defaultValue": "[resourceGroup().location]",
@@ -328,6 +381,7 @@
     "subnet2Id": "[if(equals(parameters('vnetNewOrExisting'),'new'),resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'),parameters('subnet2Name')),resourceId(parameters('vnetResourceGroup'),'Microsoft.Network/virtualNetworks/subnets', variables('vnetName'),parameters('subnet2Name')))]",
     "subnet3Id": "[if(equals(parameters('vnetNewOrExisting'),'new'),resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'),parameters('subnet3Name')),resourceId(parameters('vnetResourceGroup'),'Microsoft.Network/virtualNetworks/subnets', variables('vnetName'),parameters('subnet3Name')))]",
     "subnet4Id": "[if(equals(parameters('vnetNewOrExisting'),'new'),resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'),parameters('subnet4Name')),resourceId(parameters('vnetResourceGroup'),'Microsoft.Network/virtualNetworks/subnets', variables('vnetName'),parameters('subnet4Name')))]",
+    "subnet6Id": "[if(equals(parameters('vnetNewOrExisting'),'new'),resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'),parameters('subnet6Name')),resourceId(parameters('vnetResourceGroup'),'Microsoft.Network/virtualNetworks/subnets', variables('vnetName'),parameters('subnet6Name')))]",
 
     "fgaVmName": "[concat(parameters('fortigateNamePrefix'),'-FGT-A')]",
     "fgbVmName": "[concat(parameters('fortigateNamePrefix'),'-FGT-B')]",
@@ -415,6 +469,8 @@
     "sn4IPfga": "[concat(variables('sn4IPArray0'),'.',variables('sn4IPArray1'),'.',variables('sn4IPArray2'),'.',add(int(variables('sn4IPArray2nd')[0]),5))]",
     "sn4IPfgb": "[concat(variables('sn4IPArray0'),'.',variables('sn4IPArray1'),'.',variables('sn4IPArray2'),'.',add(int(variables('sn4IPArray2nd')[0]),6))]",
 
+    "appGwSize": "Standard_v2",
+
     "internalLBName": "[concat(parameters('fortigateNamePrefix'),'-InternalLoadBalancer')]",
     "internalLBId": "[resourceID('Microsoft.Network/loadBalancers',variables('internalLBName'))]",
     "internalLBFEName": "[concat(parameters('fortigateNamePrefix'),'-ILB-',parameters('subnet2Name'),'-FrontEnd')]",
@@ -429,13 +485,13 @@
       "apiVersion": "2019-10-01",
       "name": "pid-2dc4b447-552f-557f-b1cc-2faec6f9f133",
       "type": "Microsoft.Resources/deployments",
-      "properties":{
-       "mode": "Incremental",
-       "template": {
-         "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deplymentTemplate.json#",
-         "contentVersion": "1.0.0.0",
-         "resources": []
-       }
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deplymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": []
+        }
       }
     },
     {
@@ -443,7 +499,7 @@
       "name": "[variables('fgAvailabilitySetName')]",
       "apiVersion": "2019-12-01",
       "tags": {
-       "provider": "[toUpper(parameters('fortinetTags').provider)]"
+        "provider": "[toUpper(parameters('fortinetTags').provider)]"
       },
       "location": "[parameters('location')]",
       "properties": {
@@ -451,7 +507,7 @@
         "platformUpdateDomainCount": 2
       },
       "sku": {
-        "name":  "Aligned"
+        "name": "Aligned"
       }
     },
     {
@@ -459,7 +515,7 @@
       "name": "[variables('routeTableName')]",
       "apiVersion": "2020-04-01",
       "tags": {
-       "provider": "[toUpper(parameters('fortinetTags').provider)]"
+        "provider": "[toUpper(parameters('fortinetTags').provider)]"
       },
       "location": "[parameters('location')]",
       "properties": {
@@ -523,6 +579,115 @@
                 "id": "[variables('routeTableId')]"
               }
             }
+          },
+          {
+            "name": "[parameters('subnet6Name')]",
+            "properties": {
+              "addressPrefix": "[parameters('subnet6Prefix')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2020-05-01",
+      "name": "[parameters('applicationGatewayName')]",
+      "type": "Microsoft.Network/applicationGateways",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPName'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks/', variables('vnetName'))]"
+      ],
+      "properties": {
+        "sku": {
+          "name": "[variables('appGwSize')]",
+          "tier": "Standard_v2"
+        },
+        "autoscaleConfiguration": {
+          "minCapacity": "[parameters('minCapacity')]"
+        },
+        "gatewayIPConfigurations": [
+          {
+            "name": "appGatewayIpConfig",
+            "properties": {
+              "subnet": {
+                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), parameters('subnet6Name'))]"
+              }
+            }
+          }
+        ],
+        "frontendIPConfigurations": [
+          {
+            "name": "appGatewayFrontendIP",
+            "properties": {
+              "PublicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPName'))]"
+              }
+            }
+          }
+        ],
+        "frontendPorts": [
+          {
+            "name": "appGatewayFrontendPort",
+            "properties": {
+              "Port": "[parameters('frontendPort')]"
+            }
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "appGatewayBackendPool",
+            "properties": {
+              "BackendAddresses": [
+                {
+                  "IpAddress": "[variables('sn1IPfga')]"
+                },
+                {
+                  "IpAddress": "[variables('sn1IPfgb')]"
+                }
+              ]
+            }
+          }
+        ],
+        "backendHttpSettingsCollection": [
+          {
+            "name": "appGatewayBackendHttpSettings",
+            "properties": {
+              "Port": "[parameters('backendPort')]",
+              "Protocol": "Http",
+              "CookieBasedAffinity": "[parameters('cookieBasedAffinity')]"
+            }
+          }
+        ],
+        "httpListeners": [
+          {
+            "name": "appGatewayHttpListener",
+            "properties": {
+              "FrontendIpConfiguration": {
+                "id": "[resourceId('Microsoft.Network/applicationGateways/frontendIPConfigurations', parameters('applicationGatewayName'), 'appGatewayFrontendIP')]"
+              },
+              "FrontendPort": {
+                "id": "[resourceId('Microsoft.Network/applicationGateways/frontendPorts', parameters('applicationGatewayName'), 'appGatewayFrontendPort')]"
+              },
+              "Protocol": "Http"
+            }
+          }
+        ],
+        "requestRoutingRules": [
+          {
+            "Name": "rule1",
+            "properties": {
+              "RuleType": "Basic",
+              "httpListener": {
+                "id": "[resourceId('Microsoft.Network/applicationGateways/httpListeners', parameters('applicationGatewayName'), 'appGatewayHttpListener')]"
+              },
+              "backendAddressPool": {
+                "id": "[resourceId('Microsoft.Network/applicationGateways/backendAddressPools', parameters('applicationGatewayName'), 'appGatewayBackendPool')]"
+              },
+              "backendHttpSettings": {
+                "id": "[resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', parameters('applicationGatewayName'), 'appGatewayBackendHttpSettings')]"
+              }
+            }
           }
         ]
       }
@@ -533,7 +698,7 @@
       "name": "[variables('internalLBName')]",
       "location": "[parameters('location')]",
       "tags": {
-       "provider": "[toUpper(parameters('fortinetTags').provider)]"
+        "provider": "[toUpper(parameters('fortinetTags').provider)]"
       },
       "sku": {
         "name": "Standard"
@@ -643,8 +808,7 @@
       },
       "name": "[variables('publicIPName')]",
       "location": "[parameters('location')]",
-      "sku":
-      {
+      "sku": {
         "name": "Standard"
       },
       "properties": {
@@ -660,8 +824,7 @@
       },
       "name": "[variables('publicIP2Name')]",
       "location": "[parameters('location')]",
-      "sku":
-      {
+      "sku": {
         "name": "Standard"
       },
       "properties": {
@@ -677,8 +840,7 @@
       },
       "name": "[variables('publicIP3Name')]",
       "location": "[parameters('location')]",
-      "sku":
-      {
+      "sku": {
         "name": "Standard"
       },
       "properties": {
@@ -694,8 +856,7 @@
       },
       "name": "[variables('publicIP4Name')]",
       "location": "[parameters('location')]",
-      "sku":
-      {
+      "sku": {
         "name": "Standard"
       },
       "properties": {
@@ -711,8 +872,7 @@
       },
       "name": "[variables('publicIP5Name')]",
       "location": "[parameters('location')]",
-      "sku":
-      {
+      "sku": {
         "name": "Standard"
       },
       "properties": {
@@ -792,7 +952,7 @@
     {
       "apiVersion": "2020-04-01",
       "tags": {
-       "provider": "[toUpper(parameters('fortinetTags').provider)]"
+        "provider": "[toUpper(parameters('fortinetTags').provider)]"
       },
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[variables('fgaNic2Name')]",
@@ -824,7 +984,7 @@
     {
       "apiVersion": "2020-04-01",
       "tags": {
-       "provider": "[toUpper(parameters('fortinetTags').provider)]"
+        "provider": "[toUpper(parameters('fortinetTags').provider)]"
       },
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[variables('fgbNic2Name')]",
@@ -861,7 +1021,7 @@
     {
       "apiVersion": "2020-04-01",
       "tags": {
-       "provider": "[toUpper(parameters('fortinetTags').provider)]"
+        "provider": "[toUpper(parameters('fortinetTags').provider)]"
       },
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[variables('fgaNic3Name')]",
@@ -892,7 +1052,7 @@
     {
       "apiVersion": "2020-04-01",
       "tags": {
-       "provider": "[toUpper(parameters('fortinetTags').provider)]"
+        "provider": "[toUpper(parameters('fortinetTags').provider)]"
       },
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[variables('fgbNic3Name')]",
@@ -923,7 +1083,7 @@
     {
       "apiVersion": "2020-04-01",
       "tags": {
-       "provider": "[toUpper(parameters('fortinetTags').provider)]"
+        "provider": "[toUpper(parameters('fortinetTags').provider)]"
       },
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[variables('fgaNic4Name')]",
@@ -957,7 +1117,7 @@
     {
       "apiVersion": "2020-04-01",
       "tags": {
-       "provider": "[toUpper(parameters('fortinetTags').provider)]"
+        "provider": "[toUpper(parameters('fortinetTags').provider)]"
       },
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[variables('fgbNic4Name')]",
@@ -993,7 +1153,7 @@
       "name": "[variables('fgaVmName')]",
       "apiVersion": "2019-12-01",
       "tags": {
-       "provider": "[toUpper(parameters('fortinetTags').provider)]"
+        "provider": "[toUpper(parameters('fortinetTags').provider)]"
       },
       "identity": {
         "type": "SystemAssigned"
@@ -1076,7 +1236,7 @@
       "name": "[variables('fgbVmName')]",
       "apiVersion": "2019-12-01",
       "tags": {
-       "provider": "[toUpper(parameters('fortinetTags').provider)]"
+        "provider": "[toUpper(parameters('fortinetTags').provider)]"
       },
       "identity": {
         "type": "SystemAssigned"
@@ -1155,4 +1315,4 @@
       }
     }
   ]
-  }
+}
