@@ -36,10 +36,10 @@ The FortiGate solution can be deployed using the Azure Portal or Azure CLI. Ther
 
 ### Azure Portal
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https://github.com/jbismans/fortinet-azure-arm/blob/dev/playground/Active-Passive-APPGW/azuredeploy.json" target="_blank">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https://raw.githubusercontent.com/jbismans/fortinet-azure-arm/dev/playground/Active-Passive-APPGW/azuredeploy.json" target="_blank">
   <img src="https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true"/>
 </a>
-<a href="http://armviz.io/#/?load=https://github.com/jbismans/fortinet-azure-arm/blob/dev/playground/Active-Passive-APPGW/azuredeploy.json" target="_blank">
+<a href="http://armviz.io/#/?load=https://raw.githubusercontent.com/jbismans/fortinet-azure-arm/dev/playground/Active-Passive-APPGW/azuredeploy.json" target="_blank">
   <img src="https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/visualizebutton.svg?sanitize=true"/>
 </a>
 
