@@ -122,7 +122,7 @@
     },
     "publicIPName": {
       "type": "string",
-      "defaultValue": "FGTAPClusterPublicIP",
+      "defaultValue": "AppGWPublicIP",
       "metadata": {
         "description": "Name of Public IP address element."
       }
@@ -317,13 +317,6 @@
         "description": "Subnet 6 Prefix"
       }
     },
-    "applicationGatewayName": {
-      "type": "string",
-      "defaultValue": "applicationGatewayV2",
-      "metadata": {
-        "description": "Application Gateway name"
-      }
-    },
     "minCapacity": {
       "type": "int",
       "defaultValue": 2,
@@ -469,6 +462,7 @@
     "sn4IPfga": "[concat(variables('sn4IPArray0'),'.',variables('sn4IPArray1'),'.',variables('sn4IPArray2'),'.',add(int(variables('sn4IPArray2nd')[0]),5))]",
     "sn4IPfgb": "[concat(variables('sn4IPArray0'),'.',variables('sn4IPArray1'),'.',variables('sn4IPArray2'),'.',add(int(variables('sn4IPArray2nd')[0]),6))]",
 
+    "appGwName": "[concat(parameters('fortigateNamePrefix'),'-ApplicationGateway')]",
     "appGwSize": "Standard_v2",
 
     "internalLBName": "[concat(parameters('fortigateNamePrefix'),'-InternalLoadBalancer')]",
@@ -591,7 +585,7 @@
     },
     {
       "apiVersion": "2020-05-01",
-      "name": "[parameters('applicationGatewayName')]",
+      "name": "[variables('appGwName')]",
       "type": "Microsoft.Network/applicationGateways",
       "location": "[parameters('location')]",
       "dependsOn": [
@@ -664,10 +658,10 @@
             "name": "appGatewayHttpListener",
             "properties": {
               "FrontendIpConfiguration": {
-                "id": "[resourceId('Microsoft.Network/applicationGateways/frontendIPConfigurations', parameters('applicationGatewayName'), 'appGatewayFrontendIP')]"
+                "id": "[resourceId('Microsoft.Network/applicationGateways/frontendIPConfigurations', variables('appGwName'), 'appGatewayFrontendIP')]"
               },
               "FrontendPort": {
-                "id": "[resourceId('Microsoft.Network/applicationGateways/frontendPorts', parameters('applicationGatewayName'), 'appGatewayFrontendPort')]"
+                "id": "[resourceId('Microsoft.Network/applicationGateways/frontendPorts', variables('appGwName'), 'appGatewayFrontendPort')]"
               },
               "Protocol": "Http"
             }
@@ -679,13 +673,13 @@
             "properties": {
               "RuleType": "Basic",
               "httpListener": {
-                "id": "[resourceId('Microsoft.Network/applicationGateways/httpListeners', parameters('applicationGatewayName'), 'appGatewayHttpListener')]"
+                "id": "[resourceId('Microsoft.Network/applicationGateways/httpListeners', variables('appGwName'), 'appGatewayHttpListener')]"
               },
               "backendAddressPool": {
-                "id": "[resourceId('Microsoft.Network/applicationGateways/backendAddressPools', parameters('applicationGatewayName'), 'appGatewayBackendPool')]"
+                "id": "[resourceId('Microsoft.Network/applicationGateways/backendAddressPools', variables('appGwName'), 'appGatewayBackendPool')]"
               },
               "backendHttpSettings": {
-                "id": "[resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', parameters('applicationGatewayName'), 'appGatewayBackendHttpSettings')]"
+                "id": "[resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', variables('appGwName'), 'appGatewayBackendHttpSettings')]"
               }
             }
           }

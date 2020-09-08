@@ -33,7 +33,7 @@
             "value": "new"
         },
         "publicIPName": {
-            "value": "FGTAPClusterPublicIP"
+            "value": "AppGWPublicIP"
         },
         "publicIPResourceGroup": {
             "value": ""
@@ -112,9 +112,6 @@
         },
         "subnet6Prefix": {
             "value": "172.16.138.0/24"
-        },
-        "applicationGatewayName": {
-            "value": "applicationGatewayV2"
         },
         "minCapacity": {
             "value": 2
