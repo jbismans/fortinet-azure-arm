@@ -964,7 +964,12 @@
               "privateIPAddress": "[variables('sn2IPfga')]",
               "subnet": {
                 "id": "[variables('subnet2Id')]"
-              }
+              },
+              "loadBalancerBackendAddressPools": [
+                {
+                  "id": "[variables('internalLBBEId')]"
+                }
+              ]
             }
           }
         ],
