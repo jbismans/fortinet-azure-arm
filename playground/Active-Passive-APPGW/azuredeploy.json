@@ -776,7 +776,6 @@
       "type": "Microsoft.Network/applicationGateways",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "[variables('publicIPId')]",
         "[variables('vnetName')]"
       ],
       "properties": {
