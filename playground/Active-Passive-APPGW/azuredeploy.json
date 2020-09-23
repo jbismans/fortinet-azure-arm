@@ -521,6 +521,14 @@
               "nextHopType": "VirtualAppliance",
               "nextHopIPAddress": "[variables('sn2IPlb')]"
             }
+          },
+          {
+            "name": "toAppGW",
+            "properties": {
+              "addressPrefix": "[variables('subnet6Id')]",
+              "nextHopType": "VirtualAppliance",
+              "nextHopIPAddress": "[variables('sn2IPlb')]"
+            }
           }
         ]
       }
