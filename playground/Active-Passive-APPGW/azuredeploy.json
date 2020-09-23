@@ -525,7 +525,7 @@
           {
             "name": "toAppGW",
             "properties": {
-              "addressPrefix": "[variables('subnet6Id')]",
+              "addressPrefix": "[parameters('subnet6Prefix')]",
               "nextHopType": "VirtualAppliance",
               "nextHopIPAddress": "[variables('sn2IPlb')]"
             }
