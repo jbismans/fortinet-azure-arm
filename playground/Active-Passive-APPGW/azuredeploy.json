@@ -360,7 +360,7 @@
       "type": "object",
       "defaultValue": {
         "publisher": "Fortinet",
-        "template": "Active-Passive-ELB-ILB",
+        "template": "Active-Passive-APPGW",
         "provider": "6EB3B02F-50E5-4A3E-8CB8-2E12925831AP"
       }
     }
