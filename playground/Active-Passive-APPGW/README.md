@@ -1,31 +1,16 @@
-# Active/Passive High Available FortiGate pair with external and internal Azure Standard Load Balancer
-
-[![Build Status](https://dev.azure.com/jvh-2520/Fortinet-Azure/_apis/build/status/Azure-Passive-ELB-ILB?branchName=master)](https://dev.azure.com/jvh-2520/Fortinet-Azure/_build/latest?definitionId=13&branchName=master)
+# Active/Passive High Available FortiGate pair with Azure Application Gateway and internal Azure Standard Load Balancer
 
 # Introduction
 
-More and more enterprises are turning to Microsoft Azure to extend internal data centers and take advantage of the elasticity of the public cloud. While Azure secures the infrastructure, you are responsible for protecting everything you put in it. Fortinet Security Fabric provides Azure the broad protection, native integration and automated management enabling customers with consistent enforcement and visibility across their multi-cloud infrastructure.
-
-This ARM template deploys a High Availability pair of FortiGate Next-Generation Firewalls accompanied by the required infrastructure. Additionally, Fortinet Fabric Connectors deliver the ability to create dynamic security policies.
+The Azure Application Gateway is a web traffic load balancer that enables you to manage traffic to your web applications. In comparison to the Azure Standard Load Balancer that operates at the transport layer (Layer 4 - TCP/UDP) and route traffic based on source IP address and port, to a destination IP address and port.
+Application Gateway can make routing decisions based on additional attributes of an HTTP request, for example URI path or host headers. This type of routing is known as application layer (OSI layer 7) load balancing. Azure Application Gateway can do URL-based routing and more.
 
 # Design
 
-In Microsoft Azure, you can deploy an active/passive pair of FortiGate VMs that communicate with each other and the Azure fabric. This FortiGate setup will receive the to be inspected traffic using user defined routing (UDR) and public IPs. You can send all or specific traffic that needs inspection, going to/coming from on-prem networks or public internet by adapting the UDR routing.
+The Azure Application Gateway can be deployed together with FortiGate in several ways. These different methods will be described as scenarios. The goal of this page is to document these scenarios and provide the necessary ARM templates.
+These ARM templates deploy a High Availability pair of FortiGate Next-Generation Firewalls accompanied by an Azure Application Gateway and the required infrastructure. It is based of the "Active/Passive High Available FortiGate pair with external and internal Azure Standard Load Balancer" template which can be found [here](https://github.com/40net-cloud/fortinet-azure-solutions/tree/main/FortiGate/Active-Passive-ELB-ILB). Please also review the documentation of that template for additional information and troubleshooting.
 
-This Azure ARM template will automatically deploy a full working environment containing the the following components.
-
-  - 2 FortiGate firewall's in an active/passive deployment
-  - 1 external Azure Standard Load Balancer for communication with internet
-  - 1 internal Azure Standard Load Balancer to receive all internal traffic and forwarding towards Azure Gateways connecting ExpressRoute or Azure VPN's
-  - 1 VNET with 2 protected subnets and 4 subnets required for the FortiGate deployment (external, internal, ha mgmt and ha sync). If using an existing vnet, it must already have 5 subnets
-	- 3 public IPs. The first public IP is for cluster access to/through the active FortiGate.  The other two PIPs are for Management access
-  - User Defined Routes (UDR) for the protected subnets
-
-![active/passive design](images/fgt-ha.png)
-
-This ARM template can also be used to extend or customized based on your requirements. Additional subnets besides the one's mentioned above are not automatically generated. By adapting the ARM templates you can add additional subnets which preferably require their own routing tables.
-
-## How to deploy
+# How to deploy
 
 The FortiGate solution can be deployed using the Azure Portal or Azure CLI. There are 4 variables needed to complete kickstart the deployment. The deploy.sh script will ask them automatically. When you deploy the ARM template the Azure Portal will request the variables as a requirement.
 
@@ -36,12 +21,7 @@ The FortiGate solution can be deployed using the Azure Portal or Azure CLI. Ther
 
 ### Azure Portal
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjbismans%2Ffortinet-azure-arm%2Fdev%2Fplayground%2FActive-Passive-APPGW%2Fazuredeploy.json" target="_blank">
-  <img src="https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true"/>
-</a>
-<a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fjbismans%2Ffortinet-azure-arm%2Fdev%2Fplayground%2FActive-Passive-APPGW%2Fazuredeploy.json" target="_blank">
-  <img src="https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/visualizebutton.svg?sanitize=true"/>
-</a>
+You can find a "Deploy to Azure" button for scenario 1 and 3.
 
 ### Azure CLI
 
@@ -51,13 +31,48 @@ To deploy via Azure Cloud Shell you can connect via the Azure Portal or directly
 - Login into the Azure Cloud Shell
 - Run the following command in the Azure Cloud:
 
-`cd ~/clouddrive/ && wget -qO- https://github.com/jvhoof/fortinet-azure-solutions/archive/master.zip | jar x && cd ~/clouddrive/fortinet-azure-solutions-master/FortiGate/Active-Passive-ELB-ILB/ && ./deploy.sh`
+`cd ~/clouddrive/ && wget -qO- https://github.com/40net-cloud/fortinet-azure-solutions/archive/main.zip | jar x && cd ~/clouddrive/fortinet-azure-solutions-main/FortiGate/Active-Passive-ELB-ILB/ && ./deploy.sh`
 
 - The script will ask you a few questions to bootstrap a full deployment.
 
 ![Azure Cloud Shell](images/azure-cloud-shell.png)
 
 After deployment you will be shown the IP address of all deployed components. Both FortiGate VMs are accessible using the public management IPs using HTTPS on port 443 and SSH on port 22.
+
+# Scenario 1
+
+In this scenario the Application Gateway will be place in front of the FortiGates and act as an external loadbalancer.
+The traffic flow will look like this:
+
+![scenario1](images/scenario1.png)
+
+1. The client will do the request to the frontend IP of the Azure Application Gateway. This can be a public or private frontend.
+2. The Azure Application Gateway will process the traffic and send it to it's configured backend, which are the private "WAN" IP's of both FortiGates. The Azure Application Gateway will determin which FortiGate is active and which one is passive using health probes. Only the active FortiGate will process the health probes and so the Azure Application Gateway will send the request to the active FortiGate. The source IP of the traffic will be the IP of the Azure Application Gateway instance.
+3. The FortiGate will have two VIPs configured. A VIP for each private IP of the FortiGate with as destination the private IP of the server.
+4. On the subnet of the server there is a routetable applied with a route that will send the reply of the server via the Azure standard internal loadbalancer.
+5. The Azure standard internal loadbalancer will have an "HA ports" loadbalancing rule configured with the private "LAN" IP's of both FortiGates as backend. The Azure standard internal loadbalancer will determin which FortiGate is active and which one is passive using health probes. Only the active FortiGate will process the health probes and so the Azure standard internal loadbalancer will send the reply to the active FortiGate.
+6. The active FortiGate will send the reply to the Azure Application Gateway.
+7. The Azure Application Gateway will process the reply and send it to the client.
+
+<br/>
+
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjbismans%2Ffortinet-azure-arm%2Fdev%2Fplayground%2FActive-Passive-APPGW%2Fazuredeploy.json" target="_blank">
+  <img src="https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true"/>
+</a>
+<a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fjbismans%2Ffortinet-azure-arm%2Fdev%2Fplayground%2FActive-Passive-APPGW%2Fazuredeploy.json" target="_blank">
+  <img src="https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/visualizebutton.svg?sanitize=true"/>
+</a>
+
+This Azure ARM template will automatically deploy a full working environment containing the following components.
+
+  - 2 FortiGate firewall's in an active/passive deployment
+  - 1 Azure Application Gateway for incoming webtraffic
+  - 1 internal Azure Standard Load Balancer to receive all internal traffic
+  - 1 VNET with 1 protected subnet, application gateway subnet and 4 subnets required for the FortiGate deployment (external, internal, ha mgmt and ha sync). If using an existing vnet, it must already have these 6 subnets
+  - 5 public IPs: 1 public IP as listener on the application gateway. 2 public IP as WAN IP and 2 public IP for management access.
+  - User Defined Routes (UDR) for the protected subnet.
+
+This ARM template can also be used to extend or customized based on your requirements. Additional subnets besides the one's mentioned above are not automatically generated. By adapting the ARM templates you can add additional subnets which preferably require their own routing tables.
 
 # Requirements and limitations
 
@@ -68,28 +83,10 @@ The ARM template deploy different resource and it is required to have the access
   - BYOL: A demo license can be made available via your Fortinet partner or on our website. These can be injected during deployment or added after deployment. Purchased licenses need to be registered on the [Fortinet support site] (http://support.fortinet.com). Download the .lic file after registration. Note, these files may not work until 30 minutes after it's initial creation.
   - PAYG or OnDemand: These licenses are automatically generated during the deployment of the FortiGate systems.
 
-## Fabric Connector
+## Support
+Fortinet-provided scripts in this and other GitHub projects do not fall under the regular Fortinet technical support scope and are not supported by FortiCare Support Services.
+For direct issues, please refer to the [Issues](https://github.com/fortinet/azure-templates/issues) tab of this GitHub project.
+For other questions related to this project, contact [github@fortinet.com](mailto:github@fortinet.com).
 
-The FortiGate-VM uses [Managed Identities](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/) for the SDN Fabric Connector. A SDN Fabric Connector is created automatically during deployment. After deployment, it is required apply the 'Reader' role to Azure Subscription you want the FortiGate-VM(s) to resolve Azure Resources from. More information can be found on the [Fortinet Documentation Libary](https://docs.fortinet.com/vm/azure/fortigate/6.4/azure-cookbook/6.4.0/236610/creating-a-fabric-connector-using-a-managed-identity).
-
-# FortiGate configuration
-
-The FortiGate VMs need a specific configuration to operate in your environment. This configuration can be injected during provisioning or afterwards via the different management options including GUI, CLI, FortiManager or REST API.
-
-- [Default configuration using this template](doc/config-provisioning.md)
-- [Cloud-init](doc/config-cloud-init.md)
-- [Inbound connections](doc/config-inbound-connections.md)
-- Outbound connections
-- Public IP
-
-# Troubleshooting
-
-You can find a troubleshooting guide for this setup [here](doc/troubleshooting.md)
-
-# License
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS OR FORTINET SUPPORT (TAC) BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+## License
+[License](LICENSE) © Fortinet Technologies. All rights reserved.
