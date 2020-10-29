@@ -87,6 +87,17 @@ Due to the limitations of the Azure Application Gateway v2 and Microsoft's recom
 
 In this scenario the FortiGates will be placed between the Azure Application Gateway and it's configured backend servers. This scenario is supported with both Azure Application Gateway v1 and v2. Offloading of SSL traffic on the Azure Application Gateway is recommended.
 
+The traffic flow will look like this:
+![scenario3](images/scenario3.png)
+
+1. The client will do the request on the frontend IP of the Azure Application Gateway. This can be a public or private frontend.
+2. The Azure Application Gateway will process the request and send it to it's configured backend, which is the webserver. On the subnet of the Azure Application Gateway there are User Defined Routes with a route that will route the request first via the Azure standard internal loadbalancer.
+3. The Azure standard internal loadbalancer will have an "HA ports" loadbalancing rule configured with the private "LAN" IP's of both FortiGates as backend. The Azure standard internal loadbalancer will determin which FortiGate is active and which one is passive using health probes. Only the active FortiGate will process the health probes and so the Azure standard internal loadbalancer will send the request to the active FortiGate.
+4. The active FortiGate will send the request to the webserver.
+5. On the subnet of the webserver there are User Defined Routes with a route that will send the reply of the webserver back via the Azure standard internal loadbalancer.
+6. The Azure standard internal loadbalancer will have an "HA ports" loadbalancing rule configured with the private "LAN" IP's of both FortiGates as backend. The Azure standard internal loadbalancer will determin which FortiGate is active and which one is passive using health probes. Only the active FortiGate will process the health probes and so the Azure standard internal loadbalancer will send the reply to the active FortiGate.
+7. The active FortiGate will send the reply to the Azure Application Gateway.
+8. The Azure Application Gateway will process the reply and send it to the client.
 
 # Requirements and limitations
 
