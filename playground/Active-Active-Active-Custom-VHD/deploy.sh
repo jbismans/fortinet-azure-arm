@@ -100,7 +100,7 @@ az group create --location "$location" --name "$rg"
 echo "--> Validation deployment in $rg resource group ..."
 az deployment group validate --resource-group "$rg" \
                            --template-file azuredeploy.json \
-                           --parameters adminUsername="azureuser" adminPassword="F0rtiNet123!" FortiGateNamePrefix="$prefix" \
+                           --parameters adminUsername="$username" adminPassword="$passwd" FortiGateNamePrefix="$prefix" \
                                         osDiskVhdUri="$osDiskVhdUri" --debug
 result=$?
 if [ $result != 0 ];
@@ -113,7 +113,7 @@ fi
 echo "--> Deployment of $rg resources ..."
 az deployment group create --resource-group "$rg" \
                            --template-file azuredeploy.json \
-                           --parameters adminUsername="azureuser" adminPassword="F0rtiNet123!" FortiGateNamePrefix="$prefix" \
+                           --parameters adminUsername="$username" adminPassword="$passwd" FortiGateNamePrefix="$prefix" \
                                         osDiskVhdUri="$osDiskVhdUri" --debug
 result=$?
 if [[ $result != 0 ]];
