@@ -74,6 +74,7 @@ Depending on the version of the Azure Application Gateway this scenario will dif
 Please also review the Microsoft documentation on this topic [here](https://docs.microsoft.com/en-us/azure/application-gateway/configuration-infrastructure#supported-user-defined-routes).
 
 The rest of the scenario and template only covers the Azure Application Gateway v2.
+Microsoft Azure makes it mandatory to add a public frontend IP on the Application Gateway v2. The template will provision this public IP but it is not used by this scenario.
 
 The traffic flow will look like this:
 ![scenario2](images/scenario2.png)

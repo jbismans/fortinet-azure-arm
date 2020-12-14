@@ -109,17 +109,6 @@
         "description": "Whether to use a public IP and if so whether it is new"
       }
     },
-    "publicIP5NewOrExisting": {
-      "type": "string",
-      "defaultValue": "new",
-      "allowedValues": [
-        "new",
-        "existing"
-      ],
-      "metadata": {
-        "description": "Whether to use a public IP and if so whether it is new"
-      }
-    },
     "publicIPName": {
       "type": "string",
       "defaultValue": "AppGWPublicIP",
@@ -170,20 +159,6 @@
       }
     },
     "publicIP4ResourceGroup": {
-      "type": "string",
-      "defaultValue": "",
-      "metadata": {
-        "description": "Resource group to which the Public IP belongs."
-      }
-    },
-    "publicIP5Name": {
-      "type": "string",
-      "defaultValue": "FGTBPublicIP",
-      "metadata": {
-        "description": "Name of Public IP address element."
-      }
-    },
-    "publicIP5ResourceGroup": {
       "type": "string",
       "defaultValue": "",
       "metadata": {
@@ -378,11 +353,14 @@
 
     "fgaVmName": "[concat(parameters('fortigateNamePrefix'),'-FGT-A')]",
     "fgbVmName": "[concat(parameters('fortigateNamePrefix'),'-FGT-B')]",
-    "fgaCustomData": "[base64(concat('config system vdom-exception\nedit 1\nset object firewall.vip\nnext\nend\nconfig system sdn-connector\nedit AzureSDN\nset type azure\nnext\nend\nconfig router static\n edit 1\n set gateway ', variables('sn1GatewayIP'), '\n set device port1\n next\n edit 2\n set dst ', parameters('vnetAddressPrefix'), '\n set gateway ', variables('sn2GatewayIP'), '\n set device port2\n next\n edit 3\nset dst 168.63.129.16 255.255.255.255\nset device port2\n set gateway ', variables ('sn2GatewayIP'), '\n next\n end\n config system probe-response\n set http-probe-value OK\n set mode http-probe\n end\n config system interface\n edit port1\n set mode static\n set ip ', variables('sn1IPfga'), '/', variables('sn1CIDRmask'), '\n set description external\n set allowaccess probe-response\n next\n edit port2\n set mode static\n set ip ', variables('sn2IPfga'), '/', variables('sn2CIDRmask'), '\n set description internal\n set allowaccess probe-response\n next\n edit port3\n set mode static\n set ip ', variables('sn3IPfga'), '/', variables('sn3CIDRmask'), '\n set description hasyncport\n next\n edit port4\n set mode static\n set ip ', variables('sn4IPfga'), '/', variables('sn4CIDRmask'), '\n set description management\n set allowaccess ping https ssh ftm\n next\n end\n config system ha\n set group-name AzureHA\n set mode a-p\n set hbdev port3 100\n set session-pickup enable\n set session-pickup-connectionless enable\n set ha-mgmt-status enable\n config ha-mgmt-interfaces\n edit 1\n set interface port4\n set gateway ', variables('sn4GatewayIP'),'\n next\n end\n set override disable\n set priority 255\n set unicast-hb enable\n set unicast-hb-peerip ', variables('sn3IPfgb'), '\n end'))]",
-    "fgbCustomData": "[base64(concat('config system vdom-exception\nedit 1\nset object firewall.vip\nnext\nend\nconfig system sdn-connector\nedit AzureSDN\nset type azure\nnext\nend\nconfig router static\n edit 1\n set gateway ', variables('sn1GatewayIP'), '\n set device port1\n next\n edit 2\n set dst ', parameters('vnetAddressPrefix'), '\n set gateway ', variables('sn2GatewayIP'), '\n set device port2\n next\n edit 3\nset dst 168.63.129.16 255.255.255.255\nset device port2\n set gateway ', variables ('sn2GatewayIP'), '\n next\n end\n config system probe-response\n set http-probe-value OK\n set mode http-probe\n end\n config system interface\n edit port1\n set mode static\n set ip ', variables('sn1IPfgb'), '/', variables('sn1CIDRmask'), '\n set description external\n set allowaccess probe-response\n next\n edit port2\n set mode static\n set ip ', variables('sn2IPfgb'), '/', variables('sn2CIDRmask'), '\n set description internal\n set allowaccess probe-response\n next\n edit port3\n set mode static\n set ip ', variables('sn3IPfgb'), '/', variables('sn3CIDRmask'), '\n set description hasyncport\n next\n edit port4\n set mode static\n set ip ', variables('sn4IPfgb'), '/', variables('sn4CIDRmask'), '\n set description management\n set allowaccess ping https ssh ftm\n next\n end\n config system ha\n set group-name AzureHA\n set mode a-p\n set hbdev port3 100\n set session-pickup enable\n set session-pickup-connectionless enable\n set ha-mgmt-status enable\n config ha-mgmt-interfaces\n edit 1\n set interface port4\n set gateway ', variables('sn4GatewayIP'),'\n next\n end\n set override disable\n set priority 1\n set unicast-hb enable\n set unicast-hb-peerip ', variables('sn3IPfga'), '\n end'))]",
+    "fgaCustomData": "[base64(concat('config system sdn-connector\nedit AzureSDN\nset type azure\nnext\nend\nconfig router static\n edit 1\n set gateway ', variables('sn1GatewayIP'), '\n set device port1\n next\n edit 2\n set dst ', parameters('vnetAddressPrefix'), '\n set gateway ', variables('sn2GatewayIP'), '\n set device port2\n next\n edit 3\nset dst 168.63.129.16 255.255.255.255\nset device port2\n set gateway ', variables ('sn2GatewayIP'), '\n next\n end\n config system probe-response\n set http-probe-value OK\n set mode http-probe\n end\n config system interface\n edit port1\n set mode static\n set ip ', variables('sn1IPfga'), '/', variables('sn1CIDRmask'), '\n set description external\n set allowaccess probe-response\n next\n edit port2\n set mode static\n set ip ', variables('sn2IPfga'), '/', variables('sn2CIDRmask'), '\n set description internal\n set allowaccess probe-response\n next\n edit port3\n set mode static\n set ip ', variables('sn3IPfga'), '/', variables('sn3CIDRmask'), '\n set description hasyncport\n next\n edit port4\n set mode static\n set ip ', variables('sn4IPfga'), '/', variables('sn4CIDRmask'), '\n set description management\n set allowaccess ping https ssh ftm\n next\n end\n config system ha\n set group-name AzureHA\n set mode a-p\n set hbdev port3 100\n set session-pickup enable\n set session-pickup-connectionless enable\n set ha-mgmt-status enable\n config ha-mgmt-interfaces\n edit 1\n set interface port4\n set gateway ', variables('sn4GatewayIP'),'\n next\n end\n set override disable\n set priority 255\n set unicast-hb enable\n set unicast-hb-peerip ', variables('sn3IPfgb'), '\n end'))]",
+    "fgbCustomData": "[base64(concat('config system sdn-connector\nedit AzureSDN\nset type azure\nnext\nend\nconfig router static\n edit 1\n set gateway ', variables('sn1GatewayIP'), '\n set device port1\n next\n edit 2\n set dst ', parameters('vnetAddressPrefix'), '\n set gateway ', variables('sn2GatewayIP'), '\n set device port2\n next\n edit 3\nset dst 168.63.129.16 255.255.255.255\nset device port2\n set gateway ', variables ('sn2GatewayIP'), '\n next\n end\n config system probe-response\n set http-probe-value OK\n set mode http-probe\n end\n config system interface\n edit port1\n set mode static\n set ip ', variables('sn1IPfgb'), '/', variables('sn1CIDRmask'), '\n set description external\n set allowaccess probe-response\n next\n edit port2\n set mode static\n set ip ', variables('sn2IPfgb'), '/', variables('sn2CIDRmask'), '\n set description internal\n set allowaccess probe-response\n next\n edit port3\n set mode static\n set ip ', variables('sn3IPfgb'), '/', variables('sn3CIDRmask'), '\n set description hasyncport\n next\n edit port4\n set mode static\n set ip ', variables('sn4IPfgb'), '/', variables('sn4CIDRmask'), '\n set description management\n set allowaccess ping https ssh ftm\n next\n end\n config system ha\n set group-name AzureHA\n set mode a-p\n set hbdev port3 100\n set session-pickup enable\n set session-pickup-connectionless enable\n set ha-mgmt-status enable\n config ha-mgmt-interfaces\n edit 1\n set interface port4\n set gateway ', variables('sn4GatewayIP'),'\n next\n end\n set override disable\n set priority 1\n set unicast-hb enable\n set unicast-hb-peerip ', variables('sn3IPfga'), '\n end'))]",
 
     "routeTableName": "FGTDefaultAPRouteTable",
     "routeTableId": "[resourceId('Microsoft.Network/routeTables',variables('routeTableName'))]",
+
+    "routeTable2Name": "APPGWRouteTable",
+    "routeTable2Id": "[resourceId('Microsoft.Network/routeTables',variables('routeTable2Name'))]",
 
     "fgaNic1Name": "[concat(variables('fgaVmName'),'-Nic1')]",
     "fgaNic1Id": "[resourceId('Microsoft.Network/networkInterfaces',variables('fgaNic1Name'))]",
@@ -401,7 +379,7 @@
     "fgbNic4Name": "[concat(variables('fgbVmName'),'-Nic4')]",
     "fgbNic4Id": "[resourceId('Microsoft.Network/networkInterfaces',variables('fgbNic4Name'))]",
 
-    "publicIPName": "[if(equals(parameters('publicIPName'),''),concat(parameters('fortigateNamePrefix'),'-APPGW-PIP'),parameters('publicIPName'))]",
+    "publicIPName": "[if(equals(parameters('publicIPName'),''),concat(parameters('fortigateNamePrefix'),'-FGTs-PIP'),parameters('publicIPName'))]",
     "publicIPId": "[if(equals(parameters('publicIPNewOrExisting'),'new'),resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPName')),resourceId(parameters('publicIPResourceGroup'),'Microsoft.Network/publicIPAddresses',variables('publicIPName')))]",
     "publicIP2Name": "[if(equals(parameters('publicIP2Name'),''),concat(parameters('fortigateNamePrefix'),'-FGT-A-MGMT-PIP'),parameters('publicIP2Name'))]",
     "publicIP2Id": "[if(equals(parameters('publicIP2NewOrExisting'),'new'),resourceId('Microsoft.Network/publicIPAddresses',variables('publicIP2Name')),resourceId(parameters('publicIP2ResourceGroup'),'Microsoft.Network/publicIPAddresses',variables('publicIP2Name')))]",
@@ -409,8 +387,6 @@
     "publicIP3Id": "[if(equals(parameters('publicIP3NewOrExisting'),'new'),resourceId('Microsoft.Network/publicIPAddresses',variables('publicIP3Name')),resourceId(parameters('publicIP3ResourceGroup'),'Microsoft.Network/publicIPAddresses',variables('publicIP3Name')))]",
     "publicIP4Name": "[if(equals(parameters('publicIP4Name'),''),concat(parameters('fortigateNamePrefix'),'-FGT-A-PIP'),parameters('publicIP4Name'))]",
     "publicIP4Id": "[if(equals(parameters('publicIP4NewOrExisting'),'new'),resourceId('Microsoft.Network/publicIPAddresses',variables('publicIP4Name')),resourceId(parameters('publicIP4ResourceGroup'),'Microsoft.Network/publicIPAddresses',variables('publicIP4Name')))]",
-    "publicIP5Name": "[if(equals(parameters('publicIP5Name'),''),concat(parameters('fortigateNamePrefix'),'-FGT-B-PIP'),parameters('publicIP5Name'))]",
-    "publicIP5Id": "[if(equals(parameters('publicIP5NewOrExisting'),'new'),resourceId('Microsoft.Network/publicIPAddresses',variables('publicIP5Name')),resourceId(parameters('publicIP5ResourceGroup'),'Microsoft.Network/publicIPAddresses',variables('publicIP5Name')))]",
 
     "NSGName": "[concat(parameters('fortigateNamePrefix'),'-',uniqueString(resourceGroup().id),'-NSG')]",
     "NSGId": "[resourceID('Microsoft.Network/networkSecurityGroups/',variables('NSGName'))]",
@@ -483,7 +459,16 @@
     "internalLBBEName": "[concat(parameters('fortigateNamePrefix'),'-ILB-',parameters('subnet2Name'),'-BackEnd')]",
     "internalLBBEId": "[resourceID('Microsoft.Network/loadBalancers/backendAddressPools/',variables('internalLBName'),variables('internalLBBEName'))]",
     "internalLBProbeName": "lbprobe",
-    "internalLBProbeId": "[resourceId('Microsoft.Network/loadBalancers/probes/',variables('internalLBName'),variables('internalLBProbeName'))]"
+    "internalLBProbeId": "[resourceId('Microsoft.Network/loadBalancers/probes/',variables('internalLBName'),variables('internalLBProbeName'))]",
+
+    "externalLBName": "[concat(parameters('fortigateNamePrefix'),'-ExternalLoadBalancer')]",
+    "externalLBId": "[resourceId('Microsoft.Network/loadBalancers',variables('externalLBName'))]",
+    "externalLBFEName": "[concat(parameters('fortigateNamePrefix'),'-ELB-',parameters('subnet1Name'),'-FrontEnd')]",
+    "externalLBFEId": "[resourceID('Microsoft.Network/loadBalancers/frontendIPConfigurations/',variables('externalLBName'),variables('externalLBFEName'))]",
+    "externalLBBEName": "[concat(parameters('fortigateNamePrefix'),'-ILB-',parameters('subnet1Name'),'-BackEnd')]",
+    "externalLBBEId": "[resourceID('Microsoft.Network/loadBalancers/backendAddressPools/',variables('externalLBName'),variables('externalLBBEName'))]",
+    "externalLBProbeName": "lbprobe",
+    "externalLBProbeId": "[resourceId('Microsoft.Network/loadBalancers/probes/',variables('externalLBName'),variables('externalLBProbeName'))]"
   },
   "resources": [
     {
@@ -537,6 +522,27 @@
             "name": "toAppGW",
             "properties": {
               "addressPrefix": "[parameters('subnet6Prefix')]",
+              "nextHopType": "VirtualAppliance",
+              "nextHopIPAddress": "[variables('sn2IPlb')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/routeTables",
+      "name": "[variables('routeTable2Name')]",
+      "apiVersion": "2020-04-01",
+      "tags": {
+        "provider": "[toUpper(parameters('fortinetTags').provider)]"
+      },
+      "location": "[parameters('location')]",
+      "properties": {
+        "routes": [
+          {
+            "name": "toProtectedSubnet",
+            "properties": {
+              "addressPrefix": "[parameters('subnet5Prefix')]",
               "nextHopType": "VirtualAppliance",
               "nextHopIPAddress": "[variables('sn2IPlb')]"
             }
@@ -774,19 +780,87 @@
       }
     },
     {
-      "condition": "[equals(parameters('publicIP5NewOrExisting'), 'new')]",
-      "type": "Microsoft.Network/publicIPAddresses",
       "apiVersion": "2020-04-01",
+      "type": "Microsoft.Network/loadBalancers",
+      "name": "[variables('externalLBName')]",
+      "location": "[parameters('location')]",
       "tags": {
         "provider": "[toUpper(parameters('fortinetTags').provider)]"
       },
-      "name": "[variables('publicIP5Name')]",
-      "location": "[parameters('location')]",
-      "sku": {
+      "sku":
+      {
         "name": "Standard"
       },
+      "dependsOn": [
+        "[variables('publicIPId')]"
+      ],
       "properties": {
-        "publicIPAllocationMethod": "[parameters('publicIPAddressType')]"
+        "frontendIPConfigurations": [
+          {
+            "name": "[variables('externalLBFEName')]",
+            "properties": {
+              "publicIPAddress": {
+                "id": "[variables('publicIPId')]"
+              }
+            }
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "[variables('externalLBBEName')]"
+          }
+        ],
+        "loadBalancingRules": [
+          {
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[variables('externalLBFEId')]"
+              },
+              "backendAddressPool": {
+                "id": "[variables('externalLBBEId')]"
+              },
+              "probe": {
+                "id": "[variables('externalLBProbeId')]"
+              },
+              "protocol": "Tcp",
+              "frontendPort": 80,
+              "backendPort": 80,
+              "enableFloatingIP": true,
+              "idleTimeoutInMinutes": 5
+            },
+            "name": "PublicLBRule-FE1-http"
+          },
+          {
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[variables('externalLBFEId')]"
+              },
+              "backendAddressPool": {
+                "id": "[variables('externalLBBEId')]"
+              },
+              "probe": {
+                "id": "[variables('externalLBProbeId')]"
+              },
+              "protocol": "Udp",
+              "frontendPort": 10551,
+              "backendPort": 10551,
+              "enableFloatingIP": true,
+              "idleTimeoutInMinutes": 5
+            },
+            "name": "PublicLBRule-FE1-udp10551"
+          }
+        ],
+        "probes": [
+          {
+            "properties": {
+              "protocol": "Tcp",
+              "port": 8008,
+              "intervalInSeconds": 5,
+              "numberOfProbes": 2
+            },
+            "name": "[variables('externalLBProbeName')]"
+          }
+        ]
       }
     },
     {
@@ -820,7 +894,7 @@
             "name": "appGatewayPublicFrontendIP",
             "properties": {
               "PublicIPAddress": {
-                "id": "[variables('publicIPId')]"
+                "id": "[variables('publicIP4Id')]"
               }
             }
           },
@@ -920,12 +994,14 @@
             "properties": {
               "privateIPAddress": "[variables('sn1IPfga')]",
               "privateIPAllocationMethod": "Static",
-              "publicIPAddress": {
-                "id": "[variables('publicIP4Id')]"
-              },
               "subnet": {
                 "id": "[variables('subnet1Id')]"
-              }
+              },
+              "loadBalancerBackendAddressPools": [
+                {
+                  "id": "[variables('externalLBBEId')]"
+                }
+              ]
             }
           }
         ],
@@ -955,12 +1031,14 @@
             "properties": {
               "privateIPAddress": "[variables('sn1IPfgb')]",
               "privateIPAllocationMethod": "Static",
-              "publicIPAddress": {
-                "id": "[variables('publicIP5Id')]"
-              },
               "subnet": {
                 "id": "[variables('subnet1Id')]"
-              }
+              },
+              "loadBalancerBackendAddressPools": [
+                {
+                  "id": "[variables('externalLBBEId')]"
+                }
+              ]
             }
           }
         ],
