@@ -41,10 +41,10 @@ The traffic flow will look like this:
 
 ### Azure Portal
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjbismans%2Ffortinet-azure-arm%2Fdev%2Fplayground%2FActive-Passive-APPGW%2Fazuredeploy.json" target="_blank">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjbismans%2Ffortinet-azure-arm%2Fdev%2Fplayground%2FActive-Passive-APPGW%2Fscenario1%2Fazuredeploy.json" target="_blank">
   <img src="https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true"/>
 </a>
-<a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fjbismans%2Ffortinet-azure-arm%2Fdev%2Fplayground%2FActive-Passive-APPGW%2Fazuredeploy.json" target="_blank">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjbismans%2Ffortinet-azure-arm%2Fdev%2Fplayground%2FActive-Passive-APPGW%2Fscenario1%2Fazuredeploy.json" target="_blank">
   <img src="https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/visualizebutton.svg?sanitize=true"/>
 </a>
 
@@ -57,7 +57,7 @@ This Azure ARM template will automatically deploy a full working environment con
   - 2 FortiGate firewall's in an active/passive deployment
   - 1 Azure Application Gateway v2 for incoming web traffic
   - 1 internal Azure Standard Load Balancer to receive all internal traffic
-  - 1 VNET with 1 protected subnet, application gateway subnet and 4 subnets required for the FortiGate deployment (external, internal, ha mgmt and ha sync). If using an existing vnet, it must already have these 6 subnets
+  - 1 VNET with 1 protected subnet, application gateway subnet and 4 subnets required for the FortiGate deployment (external, internal, ha mgmt and ha sync). If using an existing VNET, it must already have these 6 subnets.
   - 5 public IPs: 1 public IP as listener on the application gateway. 2 public IP as WAN IP and 2 public IP for management access.
   - User Defined Routes (UDR) for the protected subnet.
 
@@ -88,8 +88,30 @@ The traffic flow will look like this:
 7. The active FortiGate will send the reply to it's default gateway.
 8. Azure will source NAT the reply to the public frontend IP of the Azure standard public load balancer and send it to the client.
 
-### Azure Portal and CLI
-Due to the limitations of the Azure Application Gateway v2 and Microsoft's recommendations no template will be provided.
+### Azure Portal
+
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjbismans%2Ffortinet-azure-arm%2Fdev%2Fplayground%2FActive-Passive-APPGW%2Fscenario2%2Fazuredeploy.json" target="_blank">
+  <img src="https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true"/>
+</a>
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjbismans%2Ffortinet-azure-arm%2Fdev%2Fplayground%2FActive-Passive-APPGW%2Fscenario2%2Fazuredeploy.json" target="_blank">
+  <img src="https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/visualizebutton.svg?sanitize=true"/>
+</a>
+
+### Azure CLI
+
+`cd ~/clouddrive/ && wget -qO- https://github.com/40net-cloud/fortinet-azure-solutions/archive/main.zip | jar x && cd ~/clouddrive/fortinet-azure-solutions-main/FortiGate/Active-Passive-ELB-ILB/ && ./deploy.sh`
+
+This Azure ARM template will automatically deploy a full working environment containing the following components.
+
+  - 2 FortiGate firewall's in an active/passive deployment
+  - 1 Azure Application Gateway v2
+  - 1 external Azure Standard Load Balancer for communication with the internet
+  - 1 internal Azure Standard Load Balancer to receive all internal traffic
+  - 1 VNET with 1 protected subnet, application gateway subnet and 4 subnets required for the FortiGate deployment (external, internal, ha mgmt and ha sync). If using an existing VNET, it must already have these 6 subnets.
+  - 4 public IPs: 1 public IP as listener on the application gateway (unused but an Azure requirement). 1 public IP as WAN IP on the Azure standard Load Balancer and 2 public IP for management access.
+  - User Defined Routes (UDR) for the protected subnet.
+
+This ARM template can also be used to extend or customized based on your requirements. Additional subnets besides the one's mentioned above are not automatically generated. By adapting the ARM templates you can add additional subnets which preferably require their own routing tables.
 
 ## Scenario 3
 
@@ -109,6 +131,31 @@ The traffic flow will look like this:
 6. The Azure standard internal load balancer will have an "HA ports" load balancing rule configured with the private "LAN" IP's of both FortiGates as backend. The Azure standard internal load balancer will determine which FortiGate is active and which one is passive using health probes. Only the active FortiGate will process the health probes and so the Azure standard internal load balancer will send the reply to the active FortiGate.
 7. The active FortiGate will send the reply to the Azure Application Gateway.
 8. The Azure Application Gateway will process the reply and send it to the client.
+
+### Azure Portal
+
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjbismans%2Ffortinet-azure-arm%2Fdev%2Fplayground%2FActive-Passive-APPGW%2Fscenario3%2Fazuredeploy.json" target="_blank">
+  <img src="https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true"/>
+</a>
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjbismans%2Ffortinet-azure-arm%2Fdev%2Fplayground%2FActive-Passive-APPGW%2Fscenario3%2Fazuredeploy.json" target="_blank">
+  <img src="https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/visualizebutton.svg?sanitize=true"/>
+</a>
+
+### Azure CLI
+
+`cd ~/clouddrive/ && wget -qO- https://github.com/40net-cloud/fortinet-azure-solutions/archive/main.zip | jar x && cd ~/clouddrive/fortinet-azure-solutions-main/FortiGate/Active-Passive-ELB-ILB/ && ./deploy.sh`
+
+This Azure ARM template will automatically deploy a full working environment containing the following components.
+
+  - 2 FortiGate firewall's in an active/passive deployment
+  - 1 Azure Application Gateway v2 for incoming web traffic
+  - 1 external Azure Standard Load Balancer for communication with the internet
+  - 1 internal Azure Standard Load Balancer to receive all internal traffic
+  - 1 VNET with 1 protected subnet, application gateway subnet and 4 subnets required for the FortiGate deployment (external, internal, ha mgmt and ha sync). If using an existing VNET, it must already have these 6 subnets.
+  - 4 public IPs: 1 public IP as listener on the application gateway. 1 public IP as WAN IP on the Azure standard Load Balancer and 2 public IP for management access.
+  - User Defined Routes (UDR) for the protected subnet.
+
+This ARM template can also be used to extend or customized based on your requirements. Additional subnets besides the one's mentioned above are not automatically generated. By adapting the ARM templates you can add additional subnets which preferably require their own routing tables.
 
 # Requirements and limitations
 
