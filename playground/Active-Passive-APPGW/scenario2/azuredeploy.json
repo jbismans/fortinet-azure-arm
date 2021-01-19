@@ -306,6 +306,13 @@
         "description": "Application Gateway Frontend port"
       }
     },
+    "backendPool": {
+      "type": "string",
+      "defaultValue": "1.2.3.4",
+      "metadata": {
+        "description": "Application Gateway Backend pool"
+      }
+    },
     "backendPort": {
       "type": "int",
       "defaultValue": 80,
@@ -891,10 +898,7 @@
             "properties": {
               "BackendAddresses": [
                 {
-                  "IpAddress": "[variables('sn1IPfga')]"
-                },
-                {
-                  "IpAddress": "[variables('sn1IPfgb')]"
+                  "IpAddress": "[parameters('backendPool')]"
                 }
               ]
             }
