@@ -885,21 +885,6 @@
             }
           }
         ],
-        "backendAddressPools": [
-          {
-            "name": "appGatewayBackendPool",
-            "properties": {
-              "BackendAddresses": [
-                {
-                  "IpAddress": "[variables('sn1IPfga')]"
-                },
-                {
-                  "IpAddress": "[variables('sn1IPfgb')]"
-                }
-              ]
-            }
-          }
-        ],
         "backendHttpSettingsCollection": [
           {
             "name": "appGatewayBackendHttpSettings",
