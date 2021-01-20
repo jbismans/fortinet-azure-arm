@@ -310,7 +310,7 @@
       "type": "string",
       "defaultValue": "1.2.3.4",
       "metadata": {
-        "description": "Application Gateway Backend pool"
+        "description": "Application Gateway Backend pool IP (Single IP)"
       }
     },
     "backendPort": {
@@ -925,6 +925,23 @@
                 "id": "[resourceId('Microsoft.Network/applicationGateways/frontendPorts', variables('appGwName'), 'appGatewayFrontendPort')]"
               },
               "Protocol": "Http"
+            }
+          }
+        ],
+        "requestRoutingRules": [
+          {
+            "Name": "rule1",
+            "properties": {
+              "RuleType": "Basic",
+              "httpListener": {
+                "id": "[resourceId('Microsoft.Network/applicationGateways/httpListeners', variables('appGwName'), 'appGatewayHttpListener')]"
+              },
+              "backendAddressPool": {
+                "id": "[resourceId('Microsoft.Network/applicationGateways/backendAddressPools', variables('appGwName'), 'appGatewayBackendPool')]"
+              },
+              "backendHttpSettings": {
+                "id": "[resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', variables('appGwName'), 'appGatewayBackendHttpSettings')]"
+              }
             }
           }
         ]
