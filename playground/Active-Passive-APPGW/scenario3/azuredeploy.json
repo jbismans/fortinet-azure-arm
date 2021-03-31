@@ -792,7 +792,7 @@
         "name": "Standard"
       },
       "dependsOn": [
-        "[variables('publicIPId')]"
+        "[variables('publicIPName')]"
       ],
       "properties": {
         "frontendIPConfigurations": [
