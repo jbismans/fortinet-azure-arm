@@ -111,7 +111,7 @@
     },
     "publicIPName": {
       "type": "string",
-      "defaultValue": "AppGWPublicIP",
+      "defaultValue": "FGTAPClusterPublicIP",
       "metadata": {
         "description": "Name of Public IP address element."
       }
@@ -153,7 +153,7 @@
     },
     "publicIP4Name": {
       "type": "string",
-      "defaultValue": "FGTAPublicIP",
+      "defaultValue": "AppGWPublicIP",
       "metadata": {
         "description": "Name of Public IP address element."
       }
@@ -383,13 +383,13 @@
     "fgbNic4Name": "[concat(variables('fgbVmName'),'-Nic4')]",
     "fgbNic4Id": "[resourceId('Microsoft.Network/networkInterfaces',variables('fgbNic4Name'))]",
 
-    "publicIPName": "[if(equals(parameters('publicIPName'),''),concat(parameters('fortigateNamePrefix'),'-FGTs-PIP'),parameters('publicIPName'))]",
+    "publicIPName": "[if(equals(parameters('publicIPName'),''),concat(parameters('fortigateNamePrefix'),'-FGT-PIP'),parameters('publicIPName'))]",
     "publicIPId": "[if(equals(parameters('publicIPNewOrExisting'),'new'),resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPName')),resourceId(parameters('publicIPResourceGroup'),'Microsoft.Network/publicIPAddresses',variables('publicIPName')))]",
     "publicIP2Name": "[if(equals(parameters('publicIP2Name'),''),concat(parameters('fortigateNamePrefix'),'-FGT-A-MGMT-PIP'),parameters('publicIP2Name'))]",
     "publicIP2Id": "[if(equals(parameters('publicIP2NewOrExisting'),'new'),resourceId('Microsoft.Network/publicIPAddresses',variables('publicIP2Name')),resourceId(parameters('publicIP2ResourceGroup'),'Microsoft.Network/publicIPAddresses',variables('publicIP2Name')))]",
     "publicIP3Name": "[if(equals(parameters('publicIP3Name'),''),concat(parameters('fortigateNamePrefix'),'-FGT-B-MGMT-PIP'),parameters('publicIP3Name'))]",
     "publicIP3Id": "[if(equals(parameters('publicIP3NewOrExisting'),'new'),resourceId('Microsoft.Network/publicIPAddresses',variables('publicIP3Name')),resourceId(parameters('publicIP3ResourceGroup'),'Microsoft.Network/publicIPAddresses',variables('publicIP3Name')))]",
-    "publicIP4Name": "[if(equals(parameters('publicIP4Name'),''),concat(parameters('fortigateNamePrefix'),'-FGT-A-PIP'),parameters('publicIP4Name'))]",
+    "publicIP4Name": "[if(equals(parameters('publicIP4Name'),''),concat(parameters('fortigateNamePrefix'),'-APPGW-PIP'),parameters('publicIP4Name'))]",
     "publicIP4Id": "[if(equals(parameters('publicIP4NewOrExisting'),'new'),resourceId('Microsoft.Network/publicIPAddresses',variables('publicIP4Name')),resourceId(parameters('publicIP4ResourceGroup'),'Microsoft.Network/publicIPAddresses',variables('publicIP4Name')))]",
 
     "NSGName": "[concat(parameters('fortigateNamePrefix'),'-',uniqueString(resourceGroup().id),'-NSG')]",
