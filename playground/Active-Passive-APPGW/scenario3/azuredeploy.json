@@ -602,7 +602,10 @@
           {
             "name": "[parameters('subnet6Name')]",
             "properties": {
-              "addressPrefix": "[parameters('subnet6Prefix')]"
+              "addressPrefix": "[parameters('subnet6Prefix')]",
+              "routeTable": {
+                "id": "[variables('routeTable2Id')]"
+              }
             }
           }
         ]
