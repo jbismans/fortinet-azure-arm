@@ -113,6 +113,9 @@
         "frontendPort": {
             "value": 80
         },
+        "backendPool": {
+            "value": "1.2.3.4"
+        },
         "backendPort": {
             "value": 80
         },
