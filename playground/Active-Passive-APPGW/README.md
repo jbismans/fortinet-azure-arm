@@ -1,4 +1,4 @@
-# Active/Passive High Available FortiGate pair with Azure Application Gateway and internal Azure Standard Load Balancer
+# Active/Passive High Available FortiGate pair with Azure Application Gateway and Azure Standard Load Balancer
 
 # Introduction
 
@@ -10,11 +10,11 @@ If you want to learn more about the web application security solutions of Fortin
 # Design
 
 The Azure Application Gateway can be deployed together with FortiGate in several ways. These different methods will be described as scenarios. The goal of this page is to document these scenarios and provide the necessary ARM templates.
-These ARM templates deploy a High Availability pair of FortiGate Next-Generation Firewalls accompanied by an Azure Application Gateway and the required infrastructure. It is based of the "Active/Passive High Available FortiGate pair with external and internal Azure Standard Load Balancer" template which can be found [here](https://github.com/40net-cloud/fortinet-azure-solutions/tree/main/FortiGate/Active-Passive-ELB-ILB). Please also review the documentation of that template for additional information and troubleshooting.
+These ARM templates deploy a high availability pair of FortiGate Next-Generation Firewalls accompanied by an Azure Application Gateway and the required infrastructure. It is based of the "Active/Passive High Available FortiGate pair with external and internal Azure Standard Load Balancer template which can be found [here](https://github.com/40net-cloud/fortinet-azure-solutions/tree/main/FortiGate/Active-Passive-ELB-ILB). Please also review the documentation of that template for additional information and troubleshooting.
 
 # Deployment
 
-The FortiGate solution can be deployed using the Azure Portal or Azure CLI. There are 4 variables needed to complete kickstart the deployment. The deploy.sh script will ask them automatically. When you deploy the ARM template the Azure Portal will request the variables as a requirement.
+The FortiGate solution can be deployed using the "Deploy to Azure" button, Azure Portal or Azure CLI. There are 4 variables needed to complete kickstart the deployment. The deploy.sh script will ask them automatically. When you deploy the ARM template the Azure Portal will request the variables as a requirement.
 
   - PREFIX : This prefix will be added to each of the resources created by the templates for easy of use, manageability and visibility.
   - LOCATION : This is the Azure region where the deployment will be deployed
@@ -33,7 +33,7 @@ The traffic flow will look like this:
 
 1. The client will do the request on the frontend IP of the Azure Application Gateway. This can be a public or private frontend.
 2. The Azure Application Gateway will process the traffic and send it to it's configured backend, which are the private "WAN" IP's of both FortiGates. The Azure Application Gateway will determine which FortiGate is active and which one is passive using health probes. Only the active FortiGate will respond to the health probes and so the Azure Application Gateway will only send the request to the active FortiGate. The source IP of the traffic will be the IP of the Azure Application Gateway instance.
-3. The FortiGate will have a VIP configured with the private "WAN" IP of the FortiGate as "External IP address" and with the private IP of the server as "Mapped IP address" in the VIP config. The private "WAN" IP is unique for each FortiGate, so the "External IP address" in the VIP config will be different between the active and passive FortiGate because of this the template will disable the config sync for VIPs. This setting can be found at "config system vdom-exception". So, it's a requirement to also configure a VIP with an identical name and settings, except for the "External IP address" setting, on the passive FortiGate.
+3. The FortiGate will have a VIP configured with the private "WAN" IP of the FortiGate as "External IP address" and with the private IP of the server as "Mapped IP address" in the VIP config. The private "WAN" IP is unique for each FortiGate, so the "External IP address" in the VIP config will be different between the active and passive FortiGate because of this the template will disable the config sync for VIPs. This setting can be found in the FortiGate cli at "config system vdom-exception". So, it's a requirement to also configure a VIP with an identical name and settings, except for the "External IP address" setting, on the passive FortiGate.
 4. On the subnet of the server there are User Defined Routes with a route that will send the reply of the server via the Azure standard internal load balancer.
 5. The Azure standard internal load balancer will have an "HA ports" load balancing rule configured with the private "LAN" IP's of both FortiGates as backend. The Azure standard internal load balancer will determine which FortiGate is active and which one is passive using health probes. Only the active FortiGate will respond to the health probes and so the Azure standard internal load balancer will only send the reply to the active FortiGate.
 6. The active FortiGate will send the reply to the Azure Application Gateway.
@@ -52,12 +52,12 @@ The traffic flow will look like this:
 
 `cd ~/clouddrive/ && wget -qO- https://github.com/40net-cloud/fortinet-azure-solutions/archive/main.zip | jar x && cd ~/clouddrive/fortinet-azure-solutions-main/FortiGate/Active-Passive-ELB-ILB/ && ./deploy.sh`
 
-This Azure ARM template will automatically deploy a full working environment containing the following components.
+This Azure ARM template will automatically deploy an environment containing the following components.
 
   - 2 FortiGate firewall's in an active/passive deployment
   - 1 Azure Application Gateway v2 for incoming web traffic
   - 1 internal Azure Standard Load Balancer to receive all internal traffic
-  - 1 VNET with 1 protected subnet, application gateway subnet and 4 subnets required for the FortiGate deployment (external, internal, ha mgmt and ha sync). If using an existing VNET, it must already have these 6 subnets.
+  - 1 VNET with 1 protected subnet, application gateway subnet and 4 subnets required for the FortiGate deployment (external, internal, ha mgmt and ha sync). When using an existing VNET, it must already have these 6 subnets.
   - 5 public IPs: 1 public IP as listener on the application gateway. 2 public IP as WAN IP and 2 public IP for management access.
   - User Defined Routes (UDR) for the protected subnet.
 
