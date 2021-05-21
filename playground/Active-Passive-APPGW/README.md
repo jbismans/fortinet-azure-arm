@@ -4,13 +4,13 @@
 
 The combination of Azure Application Gateway and FortiGate gives the ability to apply next-gen scanning (like IPS,AV,...) on incoming web traffic.
 
-If you want to learn more about the Azure Application Gateway, check the knowledge base [here](https://docs.microsoft.com/en-us/azure/application-gateway/overview).<br>
+If you want to learn more about the Azure Application Gateway, check [here](https://docs.microsoft.com/en-us/azure/application-gateway/overview).<br>
 If you want to learn more about the web application security solutions of Fortinet, check [here](https://www.fortinet.com/products/web-application-firewall/fortiweb).
 
 # Design
 
 The Azure Application Gateway can be deployed together with FortiGate in several ways. These different methods will be described as scenarios. The goal of this page is to document these scenarios and provide the necessary ARM templates.
-These ARM templates deploy a high availability pair of FortiGate Next-Generation Firewalls accompanied by an Azure Application Gateway and the required infrastructure. It is based of the "Active/Passive High Available FortiGate pair with external and internal Azure Standard Load Balancer template which can be found [here](https://github.com/40net-cloud/fortinet-azure-solutions/tree/main/FortiGate/Active-Passive-ELB-ILB). Please also review the documentation of that template for additional information and troubleshooting.
+These ARM templates deploy a high availability pair of FortiGate Next-Generation Firewalls accompanied by an Azure Application Gateway and the required infrastructure. It is based of the "Active/Passive High Available FortiGate pair with external and internal Azure Standard Load Balancer" template which can be found [here](https://github.com/40net-cloud/fortinet-azure-solutions/tree/main/FortiGate/Active-Passive-ELB-ILB). Please also review the documentation of that template for additional information and troubleshooting.
 
 # Deployment
 
@@ -33,7 +33,7 @@ The traffic flow will look like this:
 
 1. The client will do the request on the frontend IP of the Azure Application Gateway. This can be a public or private frontend.
 2. The Azure Application Gateway will process the traffic and send it to it's configured backend, which are the private "WAN" IP's of both FortiGates. The Azure Application Gateway will determine which FortiGate is active and which one is passive using health probes. Only the active FortiGate will respond to the health probes and so the Azure Application Gateway will only send the request to the active FortiGate. The source IP of the traffic will be the IP of the Azure Application Gateway instance.
-3. The FortiGate will have a VIP configured with the private "WAN" IP of the FortiGate as "External IP address" and with the private IP of the server as "Mapped IP address" in the VIP config. The private "WAN" IP is unique for each FortiGate, so the "External IP address" in the VIP config will be different between the active and passive FortiGate because of this the template will disable the config sync for VIPs. This setting can be found in the FortiGate cli at "config system vdom-exception". So, it's a requirement to also configure a VIP with an identical name and settings, except for the "External IP address" setting, on the passive FortiGate.
+3. The FortiGate will have a VIP configured with the private "WAN" IP of the FortiGate as "External IP address" and with the private IP of the server as "Mapped IP address" in the VIP config. The private "WAN" IP is unique for each FortiGate, so the "External IP address" in the VIP config will be different between the active and passive FortiGate because of this, the template will disable the config sync for VIPs. This setting can be found in the FortiGate cli at "config system vdom-exception". It's a requirement to also configure a VIP with an identical name and settings, except for the "External IP address" setting, on the passive FortiGate.
 4. On the subnet of the server there are User Defined Routes with a route that will send the reply of the server via the Azure standard internal load balancer.
 5. The Azure standard internal load balancer will have an "HA ports" load balancing rule configured with the private "LAN" IP's of both FortiGates as backend. The Azure standard internal load balancer will determine which FortiGate is active and which one is passive using health probes. Only the active FortiGate will respond to the health probes and so the Azure standard internal load balancer will only send the reply to the active FortiGate.
 6. The active FortiGate will send the reply to the Azure Application Gateway.
@@ -50,11 +50,11 @@ The traffic flow will look like this:
 
 ### Azure CLI
 
-`cd ~/clouddrive/ && wget -qO- https://github.com/40net-cloud/fortinet-azure-solutions/archive/main.zip | jar x && cd ~/clouddrive/fortinet-azure-solutions-main/FortiGate/Active-Passive-ELB-ILB/ && ./deploy.sh`
+`cd ~/clouddrive/ && wget -qO- https://github.com/40net-cloud/fortinet-azure-solutions/archive/main.zip | jar x && cd ~/clouddrive/fortinet-azure-solutions-main/FortiGate/Active-Passive-APPGW/ && ./deploy.sh`
 
 This Azure ARM template will automatically deploy an environment containing the following components.
 
-  - 2 FortiGate firewall's in an active/passive deployment
+  - 2 FortiGate firewalls in an active/passive deployment
   - 1 Azure Application Gateway v2 for incoming web traffic
   - 1 internal Azure Standard Load Balancer to receive all internal traffic
   - 1 VNET with 1 protected subnet, application gateway subnet and 4 subnets required for the FortiGate deployment (external, internal, ha mgmt and ha sync). When using an existing VNET, it must already have these 6 subnets.
@@ -81,7 +81,7 @@ The traffic flow will look like this:
 
 1. The client will do the request on the public frontend IP of the Azure standard public load balancer.
 2. The Azure standard public load balancer will have a load balancing rule, with the floating IP option enabled, configured with the private "WAN" IP's of both FortiGates as backend. The Azure standard public load balancer will determine which FortiGate is active and which one is passive using health probes. Only the active FortiGate will respond to the health probes and so the Azure standard public load balancer will only send the request to the active FortiGate.
-3. Because the floating IP option is enabled on the load balancing rule, the FortiGate will have a VIP with the public frontend IP of the Azure standard public load balancer configured as "External IP address" and with the private frontend of the Azure Application Gateway as "Mapped IP address". Apply source NAT on this traffic when using Application Gateway v2 is mandatory.
+3. Because the floating IP option is enabled on the load balancing rule, the FortiGate will have a VIP with the public frontend IP of the Azure standard public load balancer configured as "External IP address" and with the private frontend of the Azure Application Gateway as "Mapped IP address". Applying source NAT on this traffic when using Application Gateway v2 is mandatory.
 4. The Azure Application Gateway will process the traffic and send it to the configured backend server. The source IP of the traffic will be the IP of the Azure Application Gateway instance.
 5. The server will directly reply to the Azure Application Gateway.
 6. The Azure Application Gateway will respond directly to the active FortiGate because source NAT was applied on the request.
@@ -99,11 +99,11 @@ The traffic flow will look like this:
 
 ### Azure CLI
 
-`cd ~/clouddrive/ && wget -qO- https://github.com/40net-cloud/fortinet-azure-solutions/archive/main.zip | jar x && cd ~/clouddrive/fortinet-azure-solutions-main/FortiGate/Active-Passive-ELB-ILB/ && ./deploy.sh`
+`cd ~/clouddrive/ && wget -qO- https://github.com/40net-cloud/fortinet-azure-solutions/archive/main.zip | jar x && cd ~/clouddrive/fortinet-azure-solutions-main/FortiGate/Active-Passive-APPGW/ && ./deploy.sh`
 
 This Azure ARM template will automatically deploy a full working environment containing the following components.
 
-  - 2 FortiGate firewall's in an active/passive deployment
+  - 2 FortiGate firewalls in an active/passive deployment
   - 1 Azure Application Gateway v2
   - 1 external Azure Standard Load Balancer for communication with the internet
   - 1 internal Azure Standard Load Balancer to receive all internal traffic
@@ -124,11 +124,11 @@ The traffic flow will look like this:
 ![scenario3](images/scenario3.png)
 
 1. The client will do the request on the frontend IP of the Azure Application Gateway. This can be a public or private frontend.
-2. The Azure Application Gateway will process the request and send it to it's configured backend, which is the webserver. On the subnet of the Azure Application Gateway there are User Defined Routes with a route that will route the request first via the Azure standard internal load balancer.
-3. The Azure standard internal load balancer will have an "HA ports" load balancing rule configured with the private "LAN" IP's of both FortiGates as backend. The Azure standard internal load balancer will determine which FortiGate is active and which one is passive using health probes. Only the active FortiGate will respond to the health probes and so the Azure standard internal load balancer will only send the request to the active FortiGate.
+2. The Azure Application Gateway will process the request and send it to its configured backend, which is the webserver. On the subnet of the Azure Application Gateway there are User Defined Routes with a route that will route the request first via the Azure standard internal load balancer.
+3. The Azure standard internal load balancer will have an "HA ports" load balancing rule configured with the private "LAN" IPs of both FortiGates as backend. The Azure standard internal load balancer will determine which FortiGate is active and which one is passive using health probes. Only the active FortiGate will respond to the health probes and so the Azure standard internal load balancer will only send the request to the active FortiGate.
 4. The active FortiGate will send the request to the webserver.
 5. On the subnet of the webserver there are User Defined Routes with a route that will send the reply of the webserver back via the Azure standard internal load balancer.
-6. The Azure standard internal load balancer will have an "HA ports" load balancing rule configured with the private "LAN" IP's of both FortiGates as backend. The Azure standard internal load balancer will determine which FortiGate is active and which one is passive using health probes. Only the active FortiGate will process the health probes and so the Azure standard internal load balancer will send the reply to the active FortiGate.
+6. The Azure standard internal load balancer will have an "HA ports" load balancing rule configured with the private "LAN" IPs of both FortiGates as backend. The Azure standard internal load balancer will determine which FortiGate is active and which one is passive using health probes. Only the active FortiGate will process the health probes and so the Azure standard internal load balancer will send the reply to the active FortiGate.
 7. The active FortiGate will send the reply to the Azure Application Gateway.
 8. The Azure Application Gateway will process the reply and send it to the client.
 
@@ -143,11 +143,11 @@ The traffic flow will look like this:
 
 ### Azure CLI
 
-`cd ~/clouddrive/ && wget -qO- https://github.com/40net-cloud/fortinet-azure-solutions/archive/main.zip | jar x && cd ~/clouddrive/fortinet-azure-solutions-main/FortiGate/Active-Passive-ELB-ILB/ && ./deploy.sh`
+`cd ~/clouddrive/ && wget -qO- https://github.com/40net-cloud/fortinet-azure-solutions/archive/main.zip | jar x && cd ~/clouddrive/fortinet-azure-solutions-main/FortiGate/Active-Passive-APPGW/ && ./deploy.sh`
 
 This Azure ARM template will automatically deploy a full working environment containing the following components.
 
-  - 2 FortiGate firewall's in an active/passive deployment
+  - 2 FortiGate firewalls in an active/passive deployment
   - 1 Azure Application Gateway v2 for incoming web traffic
   - 1 external Azure Standard Load Balancer for communication with the internet
   - 1 internal Azure Standard Load Balancer to receive all internal traffic
